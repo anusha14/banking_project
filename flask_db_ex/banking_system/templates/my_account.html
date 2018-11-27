@@ -1,0 +1,80 @@
+﻿{% extends "base.html" %}
+{% block content %}
+    <div class="jumbotron">
+      {% if session['username'] %}
+
+        <h1>Welcome to your bank account!</h1>
+        <br/>
+        <h4>Your Account ID {{ account.id }} has a balance of Rs. {{ account.balance }}</h4>
+        <hr>
+
+        <hr>
+        <h4>Your transactions</h4>
+        <table class="table" id="transactions-table" style="text-align: left;"> <!-- 2vw = 2 times view width (dynmaic text size) -->
+          <thead>
+            <tr>
+              <!-- <th scope="col">#</th> -->
+              <th scope="col">Type</th>
+              <th scope="col">Description</th>
+              <th scope="col">Amount</th>
+              <th scope="col">DateTime</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in transactions %}
+            <tr>
+              <!-- <th scope="row">{{ transaction.id }}</th> -->
+              <td>{{ transaction.transaction_type }}</td>
+              <td>{{ transaction.description }}</td>
+              <td>${{ transaction.amount }}</td>
+              <td>{{ transaction.date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      {% else %}
+        <h1>Please log in!</h1>
+        <a href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+    </div>
+    <script>
+      let account_id = document.getElementById('account_id');
+      let checker = document.getElementById('id-checker');
+      let transfer = document.getElementById('transfer');
+      document.onload = function(){
+        transfer.disabled = true;
+      };
+
+      account_id.onkeyup = function(){
+        if (account_id.value == '') {
+          account_id.style.borderColor = '#ced4da';
+          checker.innerHTML = '';
+          transfer.disabled = true;
+        } else{
+          fetch('/json/account/id/' + account_id.value).then(function(response){
+            response.json().then(function(data){
+
+              checker.innerHTML = data.account;
+              if (data.account == 'valid account ID'){
+                account_id.style.borderColor = '#28a745';
+                checker.style.color = '#28a745';
+                transfer.disabled = false;
+              } else{
+                account_id.style.borderColor = '#dc3545';
+                checker.style.color = '#dc3545';
+                transfer.disabled = true;
+              }
+            });
+          });
+        }
+      }
+
+    </script>
+    <style>
+    @media only screen and (max-width: 576px){
+      body #transactions-table{
+        font-size:3vw; /* 2vw = 2 times view width (dynmaic text size)  */
+      }
+    </style>
+{% endblock %}

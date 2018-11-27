@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="jumbotron">
+      {% if session['username'] %}
+
+
+        <br/>
+        <h4>Your Account ID {{ account.id }} has a balance of Rs. {{ account.balance }}</h4>
+        <hr>
+        <div class="row">
+          <div class="col-md-6">
+            <h4>Deposit Money</h4>
+            <form method="POST">
+              {{ deposit_form.hidden_tag()}}
+              <div class="form-group">
+                <strong>{{ deposit_form.amount.label }}</strong>
+                {{ deposit_form.amount(class="form-control") }}
+                <small></small>
+              </div>
+              {{ deposit_form.deposit(class="btn btn-success") }}
+            </form>
+          </div>
+
+
+
+
+        </div>
+        <hr>
+
+
+      {% else %}
+        <h1>Please log in!</h1>
+        <a href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+    </div>
+    <script>
+      let account_id = document.getElementById('account_id');
+      let checker = document.getElementById('id-checker');
+      let transfer = document.getElementById('transfer');
+      document.onload = function(){
+        transfer.disabled = true;
+      };
+
+      account_id.onkeyup = function(){
+        if (account_id.value == '') {
+          account_id.style.borderColor = '#ced4da';
+          checker.innerHTML = '';
+          transfer.disabled = true;
+        } else{
+          fetch('/json/account/id/' + account_id.value).then(function(response){
+            response.json().then(function(data){
+
+              checker.innerHTML = data.account;
+              if (data.account == 'valid account ID'){
+                account_id.style.borderColor = '#28a745';
+                checker.style.color = '#28a745';
+                transfer.disabled = false;
+              } else{
+                account_id.style.borderColor = '#dc3545';
+                checker.style.color = '#dc3545';
+                transfer.disabled = true;
+              }
+            });
+          });
+        }
+      }
+
+    </script>
+    <style>
+    @media only screen and (max-width: 576px){
+      body #transactions-table{
+        font-size:3vw; /* 2vw = 2 times view width (dynmaic text size)  */
+      }
+    </style>
+{% endblock %}
